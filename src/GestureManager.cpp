@@ -591,14 +591,21 @@ bool GestureManager::onTouchDown(ITouch::SDownEvent ev) {
     const auto& monitorSize = this->m_lastTouchedMonitor->m_size;
     this->m_monitorArea     = SMonitorArea{monitorPos.x, monitorPos.y, monitorSize.x, monitorSize.y};
 
-    Pointer::pointerController()->warpTo(
-        Vector2D{
-            monitorPos.x + ev.pos.x * monitorSize.x,
-            monitorPos.y + ev.pos.y * monitorSize.y,
-        }
-    );
+    const Vector2D touchPos = {
+        monitorPos.x + ev.pos.x * monitorSize.x,
+        monitorPos.y + ev.pos.y * monitorSize.y,
+    };
 
-    g_pInputManager->refocus();
+    // The cursor still follows the finger: resize-on-border and mouse binds act at
+    // the cursor position.
+    Pointer::pointerController()->warpTo(touchPos);
+
+    // Refocus AT the touch position, as Hyprland's own onTouchDown does. A bare
+    // refocus() sends wl_pointer.motion to the surface under the finger right before
+    // its wl_touch.down, and Chromium (Brave, Electron apps) hides its touch-selection
+    // handles and touch menu on any pointer motion, so a selection handle could never
+    // be dragged: the touch that grabs it arrives after the handle is gone.
+    g_pInputManager->refocus(touchPos);
 
     if (this->m_sGestureState.fingers.size() == 0) {
         this->touchedResources.clear();
