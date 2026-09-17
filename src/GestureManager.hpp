@@ -42,11 +42,13 @@ struct SKeybind {
 
 struct Cfg {
     SP<Config::Values::CIntValue> longPressDelay, edgeMargin, holdTouchesDelay;
+    SP<Config::Values::CStringValue> pointerEmulationMods;
     SP<Config::Values::CFloatValue> sensitivity;
     SP<Config::Values::CBoolValue> sendCancel, resizeOnBorder, holdTouches;
 
     using INT              = Config::Values::CIntValue;
     using FLOAT            = Config::Values::CFloatValue;
+    using STR              = Config::Values::CStringValue;
     using BOOL             = Config::Values::CBoolValue;
     using SIntValueOptions = Config::Values::SIntValueOptions;
     Cfg()
@@ -73,6 +75,10 @@ struct Cfg {
           holdTouches{makeShared<BOOL>(
               "plugin:hyprgrass:hold_touches",
               "Hold back new touches so the fingers of a gesture never reach the window", true
+          )},
+          pointerEmulationMods{makeShared<STR>(
+              "plugin:hyprgrass:pointer_emulation_mods",
+              "Modifiers (e.g. SHIFT) that make a finger act as the mouse while held; empty disables", ""
           )} {}
 };
 

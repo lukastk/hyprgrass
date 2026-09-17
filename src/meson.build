@@ -13,6 +13,7 @@ if get_option('hyprgrass')
     'main.cpp',
     'GestureManager.cpp',
     'LuaTouchpadGesture.cpp',
+    'PointerEmulation.cpp',
     'ShimTrackpadGestures.cpp',
     cpp_args: ['-DWLR_USE_UNSTABLE'],
     link_with: [gestures],
