@@ -27,10 +27,10 @@ struct Cfg {
     // hack to get a C str pointer, we're gonna get rid of all this once hyprlang is dead so I don't really care how
     // ugly it is
     std::string workspaceSwipeFingersName, longPressDelayName, edgeMarginName, workspaceSwipeEdgeName, sensitivityName,
-        sendCancelName, resizeOnBorderName;
+        sendCancelName, resizeOnBorderName, pointerEmulationModsName;
 
     SP<Config::Values::CIntValue> workspaceSwipeFingers, longPressDelay, edgeMargin;
-    SP<Config::Values::CStringValue> workspaceSwipeEdge;
+    SP<Config::Values::CStringValue> workspaceSwipeEdge, pointerEmulationMods;
     SP<Config::Values::CFloatValue> sensitivity;
     SP<Config::Values::CBoolValue> sendCancel, resizeOnBorder;
 
@@ -44,6 +44,7 @@ struct Cfg {
           workspaceSwipeEdgeName{key(pluginName, "workspace_swipe_edge")},
           sensitivityName{key(pluginName, "sensitivity")}, sendCancelName{key(pluginName, "debug:send_cancel")},
           resizeOnBorderName{key(pluginName, "resize_on_border_long_press")},
+          pointerEmulationModsName{key(pluginName, "pointer_emulation_mods")},
           // config options
           workspaceSwipeFingers{makeShared<INT>(
               workspaceSwipeFingersName.data(), "Number of fingers to trigger workspace swipe",
@@ -63,7 +64,11 @@ struct Cfg {
           )},
           resizeOnBorder{
               makeShared<BOOL>(resizeOnBorderName.data(), "Resize window by pressing and holding on borders", true)
-          } {}
+          },
+          pointerEmulationMods{makeShared<STR>(
+              pointerEmulationModsName.data(),
+              "Modifiers (e.g. SHIFT) that make a finger act as the mouse while held; empty disables", ""
+          )} {}
 
   private:
     static constexpr std::string key(std::string pluginName, std::string key) {

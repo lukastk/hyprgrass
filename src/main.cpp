@@ -1,5 +1,6 @@
 #include "EmulateTouchpadGesture.hpp"
 #include "GestureManager.hpp"
+#include "PointerEmulation.hpp"
 #include "gestures/CompletedGesture.hpp"
 #include "gestures/DragGesture.hpp"
 #include "globals.hpp"
@@ -56,14 +57,26 @@ const CHyprColor error_color   = {204. / 255.0, 2. / 255.0, 2. / 255.0, 1.0};
 static bool g_unloading = false;
 
 void hkOnTouchDown(ITouch::SDownEvent ev, Event::SCallbackInfo& cbinfo) {
+    if (g_pPointerEmulation->onTouchDown(ev)) {
+        cbinfo.cancelled = true;
+        return;
+    }
     cbinfo.cancelled = g_pGestureManager->onTouchDown(ev);
 }
 
 void hkOnTouchUp(ITouch::SUpEvent ev, Event::SCallbackInfo& cbinfo) {
+    if (g_pPointerEmulation->onTouchUp(ev)) {
+        cbinfo.cancelled = true;
+        return;
+    }
     cbinfo.cancelled = g_pGestureManager->onTouchUp(ev);
 }
 
 void hkOnTouchMove(ITouch::SMotionEvent ev, Event::SCallbackInfo& cbinfo) {
+    if (g_pPointerEmulation->onTouchMove(ev)) {
+        cbinfo.cancelled = true;
+        return;
+    }
     cbinfo.cancelled = g_pGestureManager->onTouchMove(ev);
 }
 
@@ -550,6 +563,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
     HyprlandAPI::addConfigValueV2(PHANDLE, g_config->sensitivity);
     HyprlandAPI::addConfigValueV2(PHANDLE, g_config->sendCancel);
     HyprlandAPI::addConfigValueV2(PHANDLE, g_config->resizeOnBorder);
+    HyprlandAPI::addConfigValueV2(PHANDLE, g_config->pointerEmulationMods);
 
     static auto P0 = Event::bus()->m_events.config.preReload.listen([&] { onPreConfigReload(); });
 
@@ -585,6 +599,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
     HyprlandAPI::reloadConfig();
 
     g_pGestureManager       = std::make_unique<GestureManager>();
+    g_pPointerEmulation     = makeUnique<PointerEmulation>();
     g_pShimTrackpadGestures = std::make_unique<ShimTrackpadGestures>();
 
     return {"hyprgrass", "Touchscreen gestures", "horriblename", HYPRGRASS_VERSION};
